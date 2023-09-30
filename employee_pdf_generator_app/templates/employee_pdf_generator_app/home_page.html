@@ -92,14 +92,10 @@
                         </div>
 
                         <div class="row mt-4">
-                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
-                              <div class="card">
-                                <div class="card-body">
-                                  <h5 class="card-title">Form-2 Revised</h5>
-                                  <a href="#" class="btn btn-primary">Go somewhere</a>
-                                </div>
-                              </div>
+                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3" id="form_2_revised_container">
+
                             </div>
+                            
                             <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
                               <div class="card">
                                 <div class="card-body">
@@ -135,12 +131,13 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        var curl = "{{ url|safe }}";  // Access the 'url' variable using Django's template syntax
-        console.log(curl)
+        var currentURL = window.location.href;
+        console.log("Current URL: " + currentURL);
+
 
         function fetchEmployeeIDs() {
             $.ajax({
-                url: 'http://' + curl + '/employee-id',
+                url: currentURL + '/employee-id',
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
@@ -175,7 +172,7 @@
             if (selectedValues) {
                 // Make an API call with selectedValues
                 $.ajax({
-                    url: 'http://' + curl + '/' + selectedValues + '/employee-data',
+                    url: currentURL + '/' + selectedValues + '/employee-data',
                     method: 'GET',
                     dataType: 'json',
                     success: function (response) {
@@ -200,6 +197,18 @@
 
                         // Append the card to the container
                         $('#employeeDetailsContainer').html(employeeCard);
+
+
+                        var employee_form_2_revised_card = `
+                            <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Form-2 Revised</h5>
+                                <a href="${currentURL}/${selectedValues}/pdf" target="_blank" class="btn btn-primary">Go somewhere</a>
+                            </div>
+                            </div>
+                        `;
+                        // Append the card to the container
+                        $('#form_2_revised_container').html(employee_form_2_revised_card);
                     },
                     error: function (error) {
                         console.error('Error fetching employee data:', error);
