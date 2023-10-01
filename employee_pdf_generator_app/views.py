@@ -523,7 +523,7 @@ def form_13_generate_pdf(request):
     elements.append(Spacer(1, 20))
 
     data2 = []
-    for emp_number in range(0, len(all_employee_data)-1):
+    for emp_number in range(0, len(all_employee_data)):
         try:
             emp_name = ""
             try:
