@@ -93,17 +93,13 @@
 
                         <div class="row mt-4">
                             <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3" id="form_2_revised_container">
-
+                                <!-- Dynamically form2 link will be added here -->
                             </div>
                             
-                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
-                              <div class="card">
-                                <div class="card-body">
-                                  <h5 class="card-title">Special title treatment</h5>
-                                  <a href="#" class="btn btn-primary">Go somewhere</a>
-                                </div>
-                              </div>
+                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3" id="form_1_container">
+                                <!-- Dynamically form1 link will be added here -->
                             </div>
+
                             <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
                                 <div class="card">
                                   <div class="card-body">
@@ -203,12 +199,23 @@
                             <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Form-2 Revised</h5>
-                                <a href="${currentURL}/${selectedValues}/pdf" target="_blank" class="btn btn-primary">Go somewhere</a>
+                                <a href="${currentURL}/${selectedValues}/form-2-revised" target="_blank" class="btn btn-primary">Go somewhere</a>
                             </div>
                             </div>
                         `;
                         // Append the card to the container
                         $('#form_2_revised_container').html(employee_form_2_revised_card);
+
+                        var employee_form_1_card = `
+                            <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Form-1</h5>
+                                <a href="${currentURL}/${selectedValues}/form-1" target="_blank" class="btn btn-primary">Go somewhere</a>
+                            </div>
+                            </div>
+                        `;
+                        // Append the card to the container
+                        $('#form_1_container').html(employee_form_1_card);
                     },
                     error: function (error) {
                         console.error('Error fetching employee data:', error);
