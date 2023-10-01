@@ -375,22 +375,22 @@ def form_15_generate_pdf(request):
                 emp_address = ""
                 try:
                     full_address = all_employee_data[emp_number+i]['PERMENANT ADDRESS'].strip('AT:')
-                    wrapper = textwrap.TextWrapper(width=30)
-                    word_list = wrapper.wrap(text=full_address)
+                    wrapper1 = textwrap.TextWrapper(width=30)
+                    word_list1 = wrapper1.wrap(text=full_address)
                     
-                    for element in word_list:
+                    for element in word_list1:
                         emp_address += element + "\n"
-                    emp_address = emp_name.rstrip('\n')
+                    emp_address = emp_address.rstrip('\n')
                 except Exception as E:
                     print(f"error at address convert: {E}")
 
                 emp_name = ""
                 try:
                     full_name = all_employee_data[emp_number+i]['Name of Employe']
-                    wrapper = textwrap.TextWrapper(width=25)
-                    word_list = wrapper.wrap(text=full_name)
+                    wrapper2 = textwrap.TextWrapper(width=25)
+                    word_list2 = wrapper1.wrap(text=full_name)
                     
-                    for element in word_list:
+                    for element in word_list2:
                         emp_name += element + "\n"
                     emp_name = emp_name.rstrip('\n')
                 except Exception as E:
