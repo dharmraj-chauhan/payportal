@@ -4,13 +4,17 @@ import pandas as pd
 import openpyxl
 from openpyxl_image_loader import SheetImageLoader
 import tempfile
+import textwrap
 
 from io import BytesIO
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import letter, A4, landscape
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Paragraph, PageTemplate, Frame, BaseDocTemplate, PageBreak
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet, TA_CENTER
+from reportlab.lib import colors
 
 from pdfrw import PdfReader
 from pdfrw.buildxobj import pagexobj
@@ -19,8 +23,11 @@ from pdfrw.toreportlab import makerl
 filename = r'Datas/Employee_data.xlsx'
 
 def home_page(request):
-    return render(request, 'employee_pdf_generator_app/home_page.html')
-
+    current_url = request.build_absolute_uri()
+    context = {
+        'current_url': current_url,
+    }
+    return render(request, 'employee_pdf_generator_app/home_page.html', context)
 
 def get_employee_id(request):
     
@@ -32,7 +39,6 @@ def get_employee_id(request):
 
     return JsonResponse(employee_data)
 
-
 def get_emp_data_by_emp_id(request, employee_id):
     
     df = pd.read_excel(filename, header=[0])
@@ -43,15 +49,15 @@ def get_emp_data_by_emp_id(request, employee_id):
 
     new_refine_dict = {
         'employee_name' : str(employee_data_as_dict['Name of Employe']),
-        'employee_dob' : str(employee_data_as_dict['DOB']),
-        'employee_doj' : str(employee_data_as_dict['DOJ']),        
+        'employee_dob' : str(employee_data_as_dict['DOB']).split(" ")[0],
+        'employee_doj' : str(employee_data_as_dict['DOJ']).split(" ")[0],
         'employee_adhar_no' : str(employee_data_as_dict['AADHARCARD']),
         'employee_id' : str(employee_data_as_dict['E.CODE']),
         'employee_department' : str(employee_data_as_dict['DEPARTMENT']),
         'employee_mnumber' : str(employee_data_as_dict['MOBILE']),
         'employee_address' : str(employee_data_as_dict['PERMENANT ADDRESS']).strip('AT:'),
     }
-    print(new_refine_dict)
+    # print(new_refine_dict)
     return JsonResponse(new_refine_dict)
 
 def emp_data_by_emp_id(employee_id):
@@ -83,9 +89,24 @@ def emp_data_by_emp_id(employee_id):
         'employee_temp_address' : str(employee_data_as_dict['PRESENT ADDRESS']).strip('AT:'),
         'employee_const_address' : str(employee_data_as_dict['PERMENANT ADDRESS']).strip('AT:'),
     }
-    print(new_refine_dict)
+    # print(new_refine_dict)
     
     return new_refine_dict
+
+def all_emp_data():
+    df = pd.read_excel(filename, header=[0])
+    df.reset_index()
+    data_list = []
+
+    for index, row in df.iterrows():
+        row_data = {}
+        for column_name, cell_value in row.items():
+            row_data[column_name] = str(cell_value)
+        data_list.append(row_data)
+
+    # print(data_list)
+    
+    return data_list
 
 pdfmetrics.registerFont(TTFont("Helvetica-Bold", r"Fonts/Helvetica-Bold-Font.ttf"))
 
@@ -173,7 +194,7 @@ def form_1_generate_pdf(request, employee_id):
 
         if row_number is not None:
             img_flage = True
-            print(f"Employee with code '{target_employee_code}' found in row {row_number}.")
+            # print(f"Employee with code '{target_employee_code}' found in row {row_number}.")
         else:
             print(f"Employee with code '{target_employee_code}' not found in the Excel file.")
 
@@ -260,6 +281,303 @@ def form_1_generate_pdf(request, employee_id):
     response = HttpResponse(buffer.read(), content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="result.pdf"'
 
+    buffer.close()
+
+    return response
+
+def form_15_generate_pdf(request):
+    buffer = BytesIO()
+    
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), leftMargin=40, rightMargin=40, topMargin=10, bottomMargin=10)
+    elements = []
+
+    all_employee_data = all_emp_data()
+
+    # Header content
+    styles = getSampleStyleSheet()
+    header_style = ParagraphStyle(name='HeaderStyle', parent=styles['Heading1'])
+    header_style.alignment = 1
+    header_style.alignment = TA_CENTER
+    header_style.fontSize = 16
+
+    content_style = ParagraphStyle(name='ContentStyle', parent=styles["Normal"])
+    content_style.leading = 14
+    content_style.fontSize = 10
+
+    tab_line1_style = ParagraphStyle(name='ContentStyle', parent=styles["Normal"])
+    tab_line1_style.leftIndent = 167
+
+    tab_line2_style = ParagraphStyle(name='ContentStyle', parent=styles["Normal"])
+    tab_line2_style.leftIndent = 334.3
+
+    tab_line4_style = ParagraphStyle(name='ContentStyle', parent=styles["Normal"])
+    tab_line4_style.leftIndent = 214
+
+    bold_style = ParagraphStyle(name='BoldStyle', parent=content_style)
+    bold_style.fontName = 'Helvetica-Bold'
+
+    header_text = "FORM XV"
+    rule_no_text = "(See rule 88)"
+    sub_header_text = "Register of Adult worker"
+    line1_text = "<b>1.Name and Address of Contract </b>:- Speed Industrial Service"
+    line1_cont1_text = "31,Ranchod Nagar,Godhra Road,"
+    line1_cont2_text = "Halol.Dsit-Panchmahal-389350"
+
+    line2_text = "<b>2.Name and Address of establishment which contract is carriaed on </b>:- Raychem RPG Private Limited"
+    line2_cont1_text = "Near Safari Crossing,Halol GIDC,Kanjari"
+    line2_cont2_text = "Dist-Panchmahal-389350"
+    
+    line3_text = "<b>3.Nature and location of work </b>:- Loading-Unloading,Lifting Shifting etc."
+    
+    line4_text = "<b>4.Name and address of principal Employer </b>:- Raychem RPG Private Limited"
+    line4_cont1_text = "Near Safari Crossing,Halol GIDC,Kanjari"
+    line4_cont2_text = "Dist-Panchmahal-389350"
+
+    header = Paragraph(header_text, header_style)
+    sub_header = Paragraph(sub_header_text, header_style)
+    rule_no = Paragraph(rule_no_text, header_style) 
+
+    line1 = Paragraph(line1_text, content_style)
+    line1_cont_1 = Paragraph(line1_cont1_text, tab_line1_style)
+    line1_cont_2 = Paragraph(line1_cont2_text, tab_line1_style)
+    line2 = Paragraph(line2_text, content_style)
+    line2_cont_1 = Paragraph(line2_cont1_text, tab_line2_style)
+    line2_cont_2 = Paragraph(line2_cont2_text, tab_line2_style)
+    line3 = Paragraph(line3_text, content_style)
+    line4 = Paragraph(line4_text, content_style)
+    line4_cont_1 = Paragraph(line4_cont1_text, tab_line4_style)
+    line4_cont_2 = Paragraph(line4_cont2_text, tab_line4_style)
+
+    for emp_number in range(0, len(all_employee_data)-1, 6):
+
+        elements.append(header)
+        elements.append(rule_no)
+        elements.append(sub_header)
+        elements.append(Spacer(1, 10))
+        elements.append(line1)
+        elements.append(line1_cont_1)
+        elements.append(line1_cont_2)
+        elements.append(Spacer(1, 2))
+        elements.append(line2)
+        elements.append(line2_cont_1)
+        elements.append(line2_cont_2)
+        elements.append(Spacer(1, 2))
+        elements.append(line3)
+        elements.append(Spacer(1, 2))
+        elements.append(line4)
+        elements.append(line4_cont_1)
+        elements.append(line4_cont_2)
+        elements.append(Spacer(1, 20))
+
+        try:
+            data2 = []
+            for i in range(6):
+                emp_address = ""
+                try:
+                    full_address = all_employee_data[emp_number+i]['PERMENANT ADDRESS'].strip('AT:')
+                    wrapper = textwrap.TextWrapper(width=30)
+                    word_list = wrapper.wrap(text=full_address)
+                    
+                    for element in word_list:
+                        emp_address += element + "\n"
+                    emp_address = emp_name.rstrip('\n')
+                except Exception as E:
+                    print(f"error at address convert: {E}")
+
+                emp_name = ""
+                try:
+                    full_name = all_employee_data[emp_number+i]['Name of Employe']
+                    wrapper = textwrap.TextWrapper(width=25)
+                    word_list = wrapper.wrap(text=full_name)
+                    
+                    for element in word_list:
+                        emp_name += element + "\n"
+                    emp_name = emp_name.rstrip('\n')
+                except Exception as E:
+                    print(f"error at address convert: {E}")
+                    
+                data2.append([f"{emp_number+i+1}", emp_name, all_employee_data[emp_number+i]['DOB'].split(" ")[0], "M", emp_address, all_employee_data[emp_number+i]['FATHER NAME'], all_employee_data[emp_number+i]['DOJ'].split(" ")[0], "", "", "", "", "", ""])
+        except Exception as E:
+            print(E)
+
+        # body content
+        data1 = [
+            ["Sr.No", "Name", "Date of\nBirth", "Sex", "Residential Address", "Father's/\nHusband\nname", "Date of\nappointment","Group to which worker\nbelongs","", "No. of\nrelay if\nworking in\nshifts", "Adolescent if certified\nas adults","", "Re-\nmarks"],
+            ["", "", "", "", "", "", "", "Alphabet\nassigned","Nature of\nwork", "", "No. & date of\ncertificate\nof fitness", "No. under\nsection 68", ""],
+        ]
+
+        data = data1 + data2
+
+
+        table_style = [
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('SPAN',(0,0),(0,1)),
+            ('SPAN',(1,0),(1,1)),
+            ('SPAN',(2,0),(2,1)),
+            ('SPAN',(3,0),(3,1)),
+            ('SPAN',(4,0),(4,1)),
+            ('SPAN',(5,0),(5,1)),
+            ('SPAN',(6,0),(6,1)),
+            ('SPAN',(7,0),(8,0)),
+            ('SPAN',(9,0),(9,1)),
+            ('SPAN',(10,0),(11,0)),
+            ('SPAN',(12,0),(12,1)),
+            ('FONTSIZE', (0,0), (-1,-1), 8),
+            ('TEXTCOLOR', (0, 0), (-2, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 1), 2),
+            ('LEFTPADDING', (0, 0), (-1, 1), 2),
+            ('RIGHTPADDING', (0, 0), (-1, 1), 2),
+
+            ('FONTNAME', (0, 2), (-2, -1), 'Helvetica'),
+            ('VALIGN', (0, 2), (-2, -1), 'MIDDLE'),  # Center vertically
+            ('FONTSIZE', (0, 2), (-2, -1), 8),
+            ('LEFTPADDING', (0, 2), (-2, -1), 6),
+            ('RIGHTPADDING', (0, 2), (-2, -1), 6),
+        ]
+
+        table = Table(data)
+        table.setStyle(TableStyle(table_style))
+        elements.append(table)
+        elements.append(PageBreak())
+
+
+    doc.build(elements)
+
+    buffer.seek(0)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="register_of_workmen.pdf"'
+    response.write(buffer.read())
+    buffer.close()
+
+    return response
+
+def form_13_generate_pdf(request):
+    buffer = BytesIO()
+    
+    doc = SimpleDocTemplate(buffer, pagesize=(A4), leftMargin=40, rightMargin=40, topMargin=10, bottomMargin=10)
+    elements = []
+
+    all_employee_data = all_emp_data()
+
+    # Header content
+    styles = getSampleStyleSheet()
+    header_style = ParagraphStyle(name='HeaderStyle', parent=styles['Heading1'])
+    header_style.alignment = 1
+    header_style.alignment = TA_CENTER
+    header_style.fontSize = 16
+
+    content_style = styles["Normal"]
+    content_style.leading = 14
+    content_style.fontSize = 10
+
+    tab_line1_style = ParagraphStyle(name='ContentStyle', parent=styles["Normal"])
+    tab_line1_style.leftIndent = 162.5
+
+    tab_line4_style = ParagraphStyle(name='ContentStyle', parent=styles["Normal"])
+    tab_line4_style.leftIndent = 201.8
+
+    bold_style = ParagraphStyle(name='BoldStyle', parent=content_style)
+    bold_style.fontName = 'Helvetica-Bold'
+
+    header_text = "FORM XIII"
+    rule_no_text = "(See rule 75)"
+    sub_header_text = "Register of workmen employed by Contractor"
+    line1_text = "<b>Name and address of contractor</b>:- Speed Industrial Service"
+    line1_cont1_text = "31,Ranchod Nagar,Godhra Road,"
+    line1_cont2_text = "Halol.Dsit-Panchmahal-389350"
+    line2_text = "<b>Nature and location of work</b>:- Raychem RPG (P) Ltd.:- Loading-unloading, packing, shifting & Lifting Work etc"
+    line3_text = "<b>Name and address of establishment in/under which contract is carried on</b>:-"
+    line4_text = "<b>Name and address of principal employer</b>:- Raychem RPG (P) Limited"
+    line4_cont1_text = "Near Safari Crossing,Halol GIDC,Kanjari"
+    line4_cont2_text = "Dist-Panchmahal-389350"
+
+    header = Paragraph(header_text, header_style)
+    sub_header = Paragraph(sub_header_text, header_style)
+    rule_no = Paragraph(rule_no_text, header_style) 
+
+    line1 = Paragraph(line1_text, content_style)
+    line1_cont_1 = Paragraph(line1_cont1_text, tab_line1_style)
+    line1_cont_2 = Paragraph(line1_cont2_text, tab_line1_style)
+    line2 = Paragraph(line2_text, content_style)
+    line3 = Paragraph(line3_text, content_style)
+    line4 = Paragraph(line4_text, content_style)
+    line4_cont_1 = Paragraph(line4_cont1_text, tab_line4_style)
+    line4_cont_2 = Paragraph(line4_cont2_text, tab_line4_style)
+
+    elements.append(header)
+    elements.append(rule_no)
+    elements.append(sub_header)
+    elements.append(Spacer(1, 10))  # Add some space
+    elements.append(line1)
+    elements.append(line1_cont_1)
+    elements.append(line1_cont_2)
+    elements.append(Spacer(1, 2))
+    elements.append(line2)
+    elements.append(line3)
+    elements.append(line4)
+    elements.append(line4_cont_1)
+    elements.append(line4_cont_2)
+    elements.append(Spacer(1, 20))
+
+    data2 = []
+    for emp_number in range(0, len(all_employee_data)-1):
+        try:
+            emp_name = ""
+            try:
+                full_name = all_employee_data[emp_number]['Name of Employe']
+                wrapper = textwrap.TextWrapper(width=25)
+                word_list = wrapper.wrap(text=full_name)
+                
+                for element in word_list:
+                    emp_name += element + "\n"
+                emp_name = emp_name.rstrip('\n')
+            except Exception as E:
+                print(f"error at address convert: {E}")
+                
+            data2.append([f"{emp_number+1}", emp_name, "M", all_employee_data[emp_number]['FATHER NAME'], "Helper", all_employee_data[emp_number]['DOJ'].split(" ")[0], "", "", "", ""])
+        except Exception as E:
+            print(E)
+
+
+    # body content
+    data1 = [
+        ["Sr.No", "Name and surname\nof workman", "Ag.\nand\nsex", "Father's/\nHusband\nname", "Nature of\nemployment/\ndesignation", "Date of\ncommen-\ncement of\nemployment", "Sign-\nature\nof\nwork\nman", "Date\nof\ntermi-\nnation", "Reasons\nfor\ntermi-\nnation", "Re-\nmarks"],
+    ]
+
+    data = data1 + data2
+
+
+    table_style = [
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0,0), (-1,-1), 8),
+        ('TEXTCOLOR', (0, 0), (-2, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 2),
+        ('LEFTPADDING', (0, 0), (-1, 0), 2),
+        ('RIGHTPADDING', (0, 0), (-1, 0), 2),
+
+        ('FONTNAME', (0, 2), (-1, -1), 'Helvetica'),
+        ('VALIGN', (0, 2), (-1, -1), 'MIDDLE'),  # Center vertically
+        ('FONTSIZE', (0, 2), (-1, -1), 8),
+        ('LEFTPADDING', (0, 2), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 2), (-1, -1), 6),
+    ]
+
+    table = Table(data)
+    table.setStyle(TableStyle(table_style))
+    elements.append(table)
+
+    doc.build(elements)
+
+    buffer.seek(0)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="register_of_workmen.pdf"'
+    response.write(buffer.read())
     buffer.close()
 
     return response

@@ -44,7 +44,8 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mx-md-n5">
-        <a class="navbar-brand" href="http://{{url}}">SiyaMenPower Service</a>
+
+        <a class="navbar-brand" href="{{current_url}}" style="padding-left: 1.2%">SiyaMenPower Service</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -52,7 +53,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="http://{{url}}/admin/" target="_blank">Configuration</a>
+                    <a class="nav-link" href="{{current_url}}admin/" target="_blank">Configuration</a>
                 </li>
             </ul>
         </div>
@@ -100,23 +101,14 @@
                                 <!-- Dynamically form1 link will be added here -->
                             </div>
 
-                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
-                                <div class="card">
-                                  <div class="card-body">
-                                    <h5 class="card-title">Special title treatment</h5>
-                                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                                  </div>
-                                </div>
-                              </div>
-                              <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3">
-                                <div class="card">
-                                  <div class="card-body">
-                                    <h5 class="card-title">Special title treatment</h5>
-                                    <a href="#" class="btn btn-primary">Go somewhere</a>
-                                  </div>
-                                </div>
-                              </div>
-                          </div>
+                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3" id="form_15_container">
+                                <!-- Dynamically form1 link will be added here -->
+                            </div>
+
+                            <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-3" id="form_13_container">
+                                <!-- Dynamically form1 link will be added here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -129,6 +121,26 @@
 
         var currentURL = window.location.href;
         console.log("Current URL: " + currentURL);
+
+        var form_15_card = `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Form-15</h5>
+                    <a href="${currentURL}/form-15" target="_blank" class="btn btn-primary">Click here...</a>
+                </div>
+            </div>
+        `;
+        $('#form_15_container').html(form_15_card);
+
+        var form_13_card = `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Form-13</h5>
+                    <a href="${currentURL}/form-13" target="_blank" class="btn btn-primary">Click here...</a>
+                </div>
+            </div>
+        `;
+        $('#form_13_container').html(form_13_card);
 
 
         function fetchEmployeeIDs() {
@@ -199,7 +211,7 @@
                             <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Form-2 Revised</h5>
-                                <a href="${currentURL}/${selectedValues}/form-2-revised" target="_blank" class="btn btn-primary">Go somewhere</a>
+                                <a href="${currentURL}/${selectedValues}/form-2-revised" target="_blank" class="btn btn-primary">Click here...</a>
                             </div>
                             </div>
                         `;
@@ -210,7 +222,7 @@
                             <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Form-1</h5>
-                                <a href="${currentURL}/${selectedValues}/form-1" target="_blank" class="btn btn-primary">Go somewhere</a>
+                                <a href="${currentURL}/${selectedValues}/form-1" target="_blank" class="btn btn-primary">Click here...</a>
                             </div>
                             </div>
                         `;
