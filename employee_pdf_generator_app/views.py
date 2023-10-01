@@ -159,7 +159,7 @@ def form_2_generate_pdf(request, employee_id):
     buffer.seek(0)
 
     response = HttpResponse(buffer.read(), content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="result.pdf"'
+    response['Content-Disposition'] = 'inline; filename="result.pdf"; filename*=UTF-8\'\'Your_PDF_Title.pdf'
 
     buffer.close()
 

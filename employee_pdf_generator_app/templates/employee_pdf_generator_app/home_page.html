@@ -126,7 +126,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Form-15</h5>
-                    <a href="${currentURL}/form-15" target="_blank" class="btn btn-primary">Click here...</a>
+                    <a href="${currentURL}form-15/" target="_blank" class="btn btn-primary">Click here...</a>
                 </div>
             </div>
         `;
@@ -136,7 +136,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Form-13</h5>
-                    <a href="${currentURL}/form-13" target="_blank" class="btn btn-primary">Click here...</a>
+                    <a href="${currentURL}form-13/" target="_blank" class="btn btn-primary">Click here...</a>
                 </div>
             </div>
         `;
@@ -145,7 +145,7 @@
 
         function fetchEmployeeIDs() {
             $.ajax({
-                url: currentURL + '/employee-id',
+                url: currentURL + 'employee-id',
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
@@ -180,7 +180,7 @@
             if (selectedValues) {
                 // Make an API call with selectedValues
                 $.ajax({
-                    url: currentURL + '/' + selectedValues + '/employee-data',
+                    url: currentURL + selectedValues + '/employee-data/',
                     method: 'GET',
                     dataType: 'json',
                     success: function (response) {
@@ -211,7 +211,7 @@
                             <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Form-2 Revised</h5>
-                                <a href="${currentURL}/${selectedValues}/form-2-revised" target="_blank" class="btn btn-primary">Click here...</a>
+                                <a href="${currentURL}${selectedValues}/form-2-revised/" target="_blank" class="btn btn-primary">Click here...</a>
                             </div>
                             </div>
                         `;
@@ -222,7 +222,7 @@
                             <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">Form-1</h5>
-                                <a href="${currentURL}/${selectedValues}/form-1" target="_blank" class="btn btn-primary">Click here...</a>
+                                <a href="${currentURL}${selectedValues}/form-1/" target="_blank" class="btn btn-primary">Click here...</a>
                             </div>
                             </div>
                         `;
