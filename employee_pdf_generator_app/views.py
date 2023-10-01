@@ -116,24 +116,21 @@ def form_2_generate_pdf(request, employee_id):
             canvas.drawString(157, 524, employee_data['employee_maritual_status'])
             canvas.drawString(157, 506, employee_data['employee_esic_no'])
 
-            canvas.drawString(225, 587, employee_data['employee_temp_address'])
-            canvas.drawString(225, 485, employee_data['employee_const_address'])
-
-            # canvas.drawString(250, 429, employee_data[''])
-            # canvas.drawString(250, 411, employee_data[''])
+            canvas.drawString(225, 489, employee_data['employee_temp_address'])
+            canvas.drawString(225, 471, employee_data['employee_const_address'])
 
         if(page_num == 1):
-            canvas.drawString(62, 174, "HALOL")
+            canvas.drawString(62, 176, "HALOL")
             employee_full_name = employee_data['employee_name'].split(" ")
 
-            canvas.drawString(464, 87, ":")
+            canvas.drawString(452, 140, ":")
 
             canvas.setFont("Helvetica-Bold", font_size)
-            canvas.drawString(431, 227, employee_full_name[0] + " " + employee_full_name[1])
-            canvas.drawString(34, 210, employee_full_name[2])
+            canvas.drawString(431, 229.5, employee_full_name[0] + " " + employee_full_name[1])
+            canvas.drawString(34, 211.5, employee_full_name[2])
 
             canvas.drawString(407, 175, "PARMAR KAILASHBEN KISHORSINH")
-            canvas.drawString(454, 138, "PROPRIETOR")
+            canvas.drawString(456, 140, "PROPRIETOR")
 
         canvas.showPage()
 
