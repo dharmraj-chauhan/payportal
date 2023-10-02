@@ -21,8 +21,6 @@
     
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"></script> -->
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script> -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
     
@@ -37,6 +35,27 @@
         .submitbtn{
             width: -webkit-fill-available;
         }
+        .navbar-brand {
+            padding-left: 1.2%!important;
+        }
+        @media (max-width: 992px) {
+            .navbar-brand {
+                padding-left: 1.2%!important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar-brand {
+                padding-left: 4%!important;
+            }
+        }
+        /* @media (min-width: 576px) {
+            .navbar-brand {
+                padding-left: 20%!important;
+            }
+        } */
+
+        
 
     </style>
 
@@ -44,8 +63,7 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mx-md-n5">
-
-        <a class="navbar-brand" href="{{current_url}}" style="padding-left: 1.2%">SiyaMenPower Service</a>
+        <a class="navbar-brand" href="{{current_url}}">Speed Industrial Service</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -71,7 +89,9 @@
                                         <div class = "col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8">
                                             <div class="card h-100">
                                                 <div class="employee_id_dropdown rounded" style="border: 5px solid rgb(110,168,254);">
-                                                    <select class="selectpicker" id="employee_id" multiple aria-label="Default select example" data-live-search="true" data-none-selected-text="Enter Employee ID" data-max-options="1"></select>
+                                                    <select class="selectpicker" id="employee_id" multiple aria-label="Default select example" data-live-search="true" data-none-selected-text="Enter Employee ID" data-max-options="1">
+                                                        <option value="select_all">Select All</option>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -142,7 +162,6 @@
         `;
         $('#form_13_container').html(form_13_card);
 
-
         function fetchEmployeeIDs() {
             $.ajax({
                 url: currentURL + 'employee-id',
@@ -151,10 +170,8 @@
                 success: function(response) {
                     var employeeData = JSON.parse(response.data);
 
-                    // Get a reference to the select element
                     var selectElement = document.getElementById('employee_id');
 
-                    // Loop through the employee data and create options
                     for (var i = 0; i < employeeData.length; i++) {
                         var option = document.createElement('option');
                         option.value = employeeData[i];
@@ -162,7 +179,6 @@
                         selectElement.appendChild(option);
                     }
 
-                    // Initialize the selectpicker (if you're using a library like Bootstrap Select)
                     $('.selectpicker').selectpicker('refresh');
                 },
                 error: function(error) {
@@ -178,61 +194,80 @@
             console.log(`selectedValues: ${selectedValues}`)
 
             if (selectedValues) {
-                // Make an API call with selectedValues
-                $.ajax({
-                    url: currentURL + selectedValues + '/employee-data/',
-                    method: 'GET',
-                    dataType: 'json',
-                    success: function (response) {
-                        var employeeData = response;
+                if (selectedValues == 'select_all'){
+                    console.log(`Chill bro, ab ham kal aayenge.`)
+                    $('#employeeDetailsContainer').html('');
 
-                        // Create a card to display employee details
-                        var employeeCard = `
-                            <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h3 class="card-title">Employee Details</h3>
-                                        <br>
-                                        <p class="card-text">Name: ${employeeData.employee_name}</p>
-                                        <p class="card-text">Date of Joining: ${employeeData.employee_doj}</p>
-                                        <p class="card-text">Department: ${employeeData.employee_department}</p>
-                                        <p class="card-text">Mobile Number: ${employeeData.employee_mnumber}</p>
-                                        <p class="card-text">Address: ${employeeData.employee_address}</p>
+                    var employee_form_2_revised_card = `
+                        <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">All Employe Form-2</h5>
+                            <a href="${currentURL}all_employee/form-2-revised-all/" target="_blank" class="btn btn-primary">Click here...</a>
+                        </div>
+                        </div>
+                    `;
+                    $('#form_2_revised_container').html(employee_form_2_revised_card);
+
+                    var employee_form_1_card = `
+                        <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">All Employe Form-1</h5>
+                            <a href="${currentURL}all_employee/form-1-all/" target="_blank" class="btn btn-primary">Click here...</a>
+                        </div>
+                        </div>
+                    `;
+                    $('#form_1_container').html(employee_form_1_card);
+                } else {
+                    // Make an API call with selectedValues
+                    $.ajax({
+                        url: currentURL + selectedValues + '/employee-data/',
+                        method: 'GET',
+                        dataType: 'json',
+                        success: function (response) {
+                            var employeeData = response;
+
+                            var employeeCard = `
+                                <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h3 class="card-title">Employee Details</h3>
+                                            <br>
+                                            <p class="card-text">Name: ${employeeData.employee_name}</p>
+                                            <p class="card-text">Date of Joining: ${employeeData.employee_doj}</p>
+                                            <p class="card-text">Department: ${employeeData.employee_department}</p>
+                                            <p class="card-text">Mobile Number: ${employeeData.employee_mnumber}</p>
+                                            <p class="card-text">Address: ${employeeData.employee_address}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                            $('#employeeDetailsContainer').html(employeeCard);
 
-                        // Append the card to the container
-                        $('#employeeDetailsContainer').html(employeeCard);
+                            var employee_form_2_revised_card = `
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Form-2 Revised</h5>
+                                    <a href="${currentURL}${selectedValues}/form-2-revised/" target="_blank" class="btn btn-primary">Click here...</a>
+                                </div>
+                                </div>
+                            `;
+                            $('#form_2_revised_container').html(employee_form_2_revised_card);
 
-
-                        var employee_form_2_revised_card = `
-                            <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Form-2 Revised</h5>
-                                <a href="${currentURL}${selectedValues}/form-2-revised/" target="_blank" class="btn btn-primary">Click here...</a>
-                            </div>
-                            </div>
-                        `;
-                        // Append the card to the container
-                        $('#form_2_revised_container').html(employee_form_2_revised_card);
-
-                        var employee_form_1_card = `
-                            <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Form-1</h5>
-                                <a href="${currentURL}${selectedValues}/form-1/" target="_blank" class="btn btn-primary">Click here...</a>
-                            </div>
-                            </div>
-                        `;
-                        // Append the card to the container
-                        $('#form_1_container').html(employee_form_1_card);
-                    },
-                    error: function (error) {
-                        console.error('Error fetching employee data:', error);
-                    }
-                });
+                            var employee_form_1_card = `
+                                <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Form-1</h5>
+                                    <a href="${currentURL}${selectedValues}/form-1/" target="_blank" class="btn btn-primary">Click here...</a>
+                                </div>
+                                </div>
+                            `;
+                            $('#form_1_container').html(employee_form_1_card);
+                        },
+                        error: function (error) {
+                            console.error('Error fetching employee data:', error);
+                        }
+                    });
+                }
             }
         }
 
@@ -250,7 +285,6 @@
         $('#submitBtn').on('click', function () {
             $('#employee_id').selectpicker('deselectAll'); // Clear the selection
         });
-
 
     })
     

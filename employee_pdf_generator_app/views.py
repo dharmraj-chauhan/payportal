@@ -5,6 +5,7 @@ import openpyxl
 from openpyxl_image_loader import SheetImageLoader
 import tempfile
 import textwrap
+import zipfile
 
 from io import BytesIO
 from reportlab.lib.pagesizes import letter, A4, landscape
@@ -29,6 +30,7 @@ def home_page(request):
     }
     return render(request, 'employee_pdf_generator_app/home_page.html', context)
 
+# for the dropdown employee id
 def get_employee_id(request):
     
     df = pd.read_excel(filename, header=[0])
@@ -39,6 +41,7 @@ def get_employee_id(request):
 
     return JsonResponse(employee_data)
 
+# after selecting dropdown option this function will return basic information
 def get_emp_data_by_emp_id(request, employee_id):
     
     df = pd.read_excel(filename, header=[0])
@@ -60,6 +63,7 @@ def get_emp_data_by_emp_id(request, employee_id):
     # print(new_refine_dict)
     return JsonResponse(new_refine_dict)
 
+# this function is dedicated to fetch single employee information
 def emp_data_by_emp_id(employee_id):
     
     df = pd.read_excel(filename, header=[0])
@@ -93,6 +97,7 @@ def emp_data_by_emp_id(employee_id):
     
     return new_refine_dict
 
+# this function is dedicated to fetch all employee data
 def all_emp_data():
     df = pd.read_excel(filename, header=[0])
     df.reset_index()
@@ -110,7 +115,7 @@ def all_emp_data():
 
 pdfmetrics.registerFont(TTFont("Helvetica-Bold", r"Fonts/Helvetica-Bold-Font.ttf"))
 
-def form_2_generate_pdf(request, employee_id):
+def form_2_generate_pdf_by_id(employee_id):
     buffer = BytesIO()
 
     template = PdfReader(r"Forms/Form_2_Revised.pdf", decompress=False)
@@ -158,14 +163,43 @@ def form_2_generate_pdf(request, employee_id):
     canvas.save()
     buffer.seek(0)
 
+    return buffer
+
+def form_2_generate_pdf(request, employee_id):
+
+    buffer = form_2_generate_pdf_by_id(employee_id)
     response = HttpResponse(buffer.read(), content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="result.pdf"; filename*=UTF-8\'\'Your_PDF_Title.pdf'
+    response['Content-Disposition'] = 'inline; filename="result.pdf"'
 
     buffer.close()
+    return response
+
+# New view function to generate PDFs of form2 for multiple employees
+def form_2_generate_multiple_employee_pdfs(request):
+    
+    df = pd.read_excel(filename, header=[0])
+    df.reset_index()
+    employee_ids = list(df['E.CODE'])
+    zip_buffer = BytesIO()
+
+    # Create a zip file and add PDFs for each employee
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for employee_id in employee_ids:
+
+            print(f"This is employee id, generate_multiple_employee_pdfs: {employee_id}")
+            pdf_buffer = form_2_generate_pdf_by_id(employee_id)
+
+            # Add the PDF to the zip file with a unique name (e.g., employee_id.pdf)
+            zipf.writestr(f'{employee_id}_form-2.pdf', pdf_buffer.getvalue())
+
+    # Close the zip buffer and prepare the response
+    zip_buffer.seek(0)
+    response = HttpResponse(zip_buffer.read(), content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=all_employee_form-2_pdfs.zip'
 
     return response
 
-def form_1_generate_pdf(request, employee_id):
+def form_1_generate_pdf_by_id(employee_id):
     buffer = BytesIO()
 
     template = PdfReader(r"Forms/None_Form1_Declaration_ESI.pdf", decompress=False)
@@ -176,6 +210,7 @@ def form_1_generate_pdf(request, employee_id):
     font_size = 8
     font_name = "Helvetica"
     img_flage = False
+    temp_image_path = None
     employee_data = emp_data_by_emp_id(employee_id)
 
     try:
@@ -196,6 +231,7 @@ def form_1_generate_pdf(request, employee_id):
             img_flage = True
             # print(f"Employee with code '{target_employee_code}' found in row {row_number}.")
         else:
+            img_flage = False
             print(f"Employee with code '{target_employee_code}' not found in the Excel file.")
 
         if img_flage:
@@ -203,6 +239,7 @@ def form_1_generate_pdf(request, employee_id):
             temp_image_path = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name
             image.save(temp_image_path)
         else:
+            temp_image_path = None
             image = None
 
     except Exception as E:
@@ -270,7 +307,7 @@ def form_1_generate_pdf(request, employee_id):
             canvas.drawString(283, 596, "") # m
             canvas.drawString(291, 596, "-") # u
 
-            if (img_flage == True):
+            if ((img_flage == True) and (temp_image_path != None)):
                 canvas.drawImage(temp_image_path, 402, 59, width=100, height=80)
 
         canvas.showPage()
@@ -278,10 +315,40 @@ def form_1_generate_pdf(request, employee_id):
     canvas.save()
     buffer.seek(0)
 
+    return buffer
+
+def form_1_generate_pdf(request, employee_id):
+    
+    buffer = form_1_generate_pdf_by_id(employee_id)
     response = HttpResponse(buffer.read(), content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename="result.pdf"'
 
     buffer.close()
+
+    return response
+
+# New view function to generate PDFs of form1 for multiple employees
+def form_1_generate_multiple_employee_pdfs(request):
+    
+    df = pd.read_excel(filename, header=[0])
+    df.reset_index()
+    employee_ids = list(df['E.CODE'])
+    zip_buffer = BytesIO()
+
+    # Create a zip file and add PDFs for each employee
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for employee_id in employee_ids:
+
+            print(f"This is employee id, generate_multiple_employee_pdfs: {employee_id}")
+            pdf_buffer = form_1_generate_pdf_by_id(employee_id)
+
+            # Add the PDF to the zip file with a unique name (e.g., employee_id.pdf)
+            zipf.writestr(f'{employee_id}_form-1.pdf', pdf_buffer.getvalue())
+
+    # Close the zip buffer and prepare the response
+    zip_buffer.seek(0)
+    response = HttpResponse(zip_buffer.read(), content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=all_employee_form-1_pdfs.zip'
 
     return response
 
@@ -581,3 +648,4 @@ def form_13_generate_pdf(request):
     buffer.close()
 
     return response
+
