@@ -75,9 +75,9 @@ def emp_data_by_emp_id(employee_id):
     new_refine_dict = {
         'employee_name' : str(employee_data_as_dict['Name of Employe']),
         'employee_father_name' : str(employee_data_as_dict['FATHER NAME']),
-        'employee_dob' : str(employee_data_as_dict['DOB']),
-        'employee_doj' : str(employee_data_as_dict['DOJ']),
-        'employee_pf_no' : str(employee_data_as_dict['PF NO']),
+        'employee_dob' : str(employee_data_as_dict['DOB']).split(" ")[0],
+        'employee_doj' : str(employee_data_as_dict['DOJ']).split(" ")[0],
+        'employee_pf_no' : str(employee_data_as_dict['PF NO']).strip(),
         'employee_uan_no' : str(employee_data_as_dict['UAN NO']),
         'employee_maritual_status' : str('MARRIED'),
         'employee_sex' : str('MALE'),
@@ -140,10 +140,12 @@ def form_2_generate_pdf_by_id(employee_id):
             canvas.drawString(157, 560, employee_data['employee_dob'])
             canvas.drawString(157, 542, employee_data['employee_sex'])
             canvas.drawString(157, 524, employee_data['employee_maritual_status'])
-            canvas.drawString(157, 506, employee_data['employee_esic_no'])
+            canvas.drawString(157, 506, employee_data['employee_pf_no'])
 
             canvas.drawString(225, 489, employee_data['employee_temp_address'])
             canvas.drawString(225, 471, employee_data['employee_const_address'])
+
+            canvas.drawString(225, 453, employee_data['employee_doj'])
 
         if(page_num == 1):
             canvas.drawString(62, 176, "HALOL")
